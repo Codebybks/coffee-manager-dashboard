@@ -1,14 +1,13 @@
-import React,  { useState, useCallback, createContext, useContext, useEffect } from 'react';
-import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+
+import React,  { useState, useCallback, createContext, useContext, ReactNode } from 'react';
+import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Customer, SalesOrder, Invoice, Expense, NavItem, Interaction, AppContextType, CoffeeOrigin, CustomerStatus, ShippingStatus, InvoiceStatus, ExpenseType, Certification, PaymentMethod } from './types';
 import CrmPage from './components/CrmPage';
 import SalesPage from './components/SalesPage';
 import InvoicesPage from './components/InvoicesPage';
 import ExpensesPage from './components/ExpensesPage';
 import DashboardPage from './components/DashboardPage';
-import LoginPage from './components/LoginPage'; // Import LoginPage
 import { HomeIcon, UsersIcon, ShoppingCartIcon, DocumentTextIcon, CreditCardIcon, ChartBarIcon } from './constants';
-import { supabase, Session } from './supabaseClient'; // Import supabase and Session
 
 const initialCustomers: Customer[] = [
   { id: 'cust_1', companyName: 'Beans & Brews', contactPerson: 'Alice Smith', country: 'USA', email: 'alice@bnb.com', phone: '555-1234', preferredOrigin: CoffeeOrigin.YIRGACHEFFE, certificationsRequired: [Certification.ORGANIC, Certification.FAIR_TRADE], status: CustomerStatus.ACTIVE, assignedSalesRep: 'John Doe', notes: 'Loves bright, acidic coffees.', nextFollowUpDate: '2024-08-15', interactions: [{id: 'int_1', date: '2024-07-10', type: 'Call', notes: 'Discussed new Yirgacheffe crop.'}] },
@@ -40,47 +39,11 @@ export const useAppContext = () => {
 };
 
 const App: React.FC = () => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loadingAuth, setLoadingAuth] = useState<boolean>(true);
-
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
   const [salesOrders, setSalesOrders] = useState<SalesOrder[]>(initialSalesOrders);
   const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
   const [expenses, setExpenses] = useState<Expense[]>(initialExpenses);
   const location = useLocation();
-  const navigate = useNavigate();
-
-
-  useEffect(() => {
-    const getSession = async () => {
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      setSession(currentSession);
-      setLoadingAuth(false);
-    };
-    getSession();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (!session) { // If user logs out or session expires, navigate to login
-        navigate('/'); // Assuming '/' is the login page when not authenticated
-      }
-    });
-
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
-  }, [navigate]);
-  
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error('Error logging out:', error);
-      alert(`Error logging out: ${error.message}`);
-    } else {
-      setSession(null); // Explicitly set session to null
-      // onAuthStateChange will also fire, ensuring navigation
-    }
-  };
 
   const generateId = (prefix: string) => `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
@@ -159,8 +122,6 @@ const App: React.FC = () => {
   }, []);
 
   const appContextValue: AppContextType = {
-    session, // Add session to context
-    logout: handleLogout, // Add logout to context
     customers, setCustomers, addCustomer, updateCustomer, logInteraction,
     salesOrders, setSalesOrders, addSalesOrder, updateSalesOrder,
     invoices, setInvoices, addInvoice, updateInvoice, generateInvoiceForOrder,
@@ -174,72 +135,49 @@ const App: React.FC = () => {
     { path: '/invoices', label: 'Invoices', icon: <DocumentTextIcon className="w-5 h-5 mr-2" /> },
     { path: '/expenses', label: 'Expenses', icon: <CreditCardIcon className="w-5 h-5 mr-2" /> },
   ];
-  
-  if (loadingAuth) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-light-gray">
-        <p className="text-xl text-primary">Loading application...</p>
-        {/* You can add a spinner here */}
-      </div>
-    );
-  }
 
   return (
     <AppContext.Provider value={appContextValue}>
-      {!session ? (
-        <LoginPage />
-      ) : (
-        <div className="min-h-screen flex flex-col bg-light-gray">
-          <header className="bg-primary text-white shadow-md">
-            <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-              <div className="flex items-center">
-                <HomeIcon className="w-8 h-8 mr-3 text-accent"/>
-                <h1 className="text-2xl font-semibold">Coffee Export Manager</h1>
-              </div>
-              <div className="flex items-center space-x-4">
-                <nav className="flex space-x-1">
-                  {navItems.map(item => (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ease-in-out ${
-                        location.pathname === item.path 
-                          ? 'bg-accent text-primary' 
-                          : 'text-gray-200 hover:bg-secondary hover:text-white'
-                      }`}
-                    >
-                      {item.icon}
-                      {item.label}
-                    </Link>
-                  ))}
-                </nav>
-                <button
-                  onClick={handleLogout}
-                  className="px-3 py-2 rounded-md text-sm font-medium bg-error hover:bg-red-700 text-white transition-colors"
-                >
-                  Logout
-                </button>
-              </div>
+      <div className="min-h-screen flex flex-col bg-light-gray">
+        <header className="bg-primary text-white shadow-md">
+          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div className="flex items-center">
+              <HomeIcon className="w-8 h-8 mr-3 text-accent"/>
+              <h1 className="text-2xl font-semibold">Coffee Export Manager</h1>
             </div>
-          </header>
+            <nav className="flex space-x-1">
+              {navItems.map(item => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ease-in-out ${
+                    location.pathname === item.path 
+                      ? 'bg-accent text-primary' 
+                      : 'text-gray-200 hover:bg-secondary hover:text-white'
+                  }`}
+                >
+                  {item.icon}
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </header>
 
-          <main className="flex-grow container mx-auto px-4 py-6">
-            <Routes>
-              <Route path="/" element={<DashboardPage />} />
-              <Route path="/crm" element={<CrmPage />} />
-              <Route path="/sales" element={<SalesPage />} />
-              <Route path="/invoices" element={<InvoicesPage />} />
-              <Route path="/expenses" element={<ExpensesPage />} />
-              {/* Add a catch-all or redirect if needed for unauthenticated access to specific paths,
-                  though the top-level session check should handle most cases. */}
-            </Routes>
-          </main>
-          <footer className="bg-primary text-white text-center py-4">
-            <p>&copy; {new Date().getFullYear()} Coffee Export Solutions. All rights reserved.</p>
-            <p className="text-xs text-gray-400 mt-1">Data is stored in-memory and will be lost on page refresh (Demo purposes).</p>
-          </footer>
-        </div>
-      )}
+        <main className="flex-grow container mx-auto px-4 py-6">
+          <Routes>
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/crm" element={<CrmPage />} />
+            <Route path="/sales" element={<SalesPage />} />
+            <Route path="/invoices" element={<InvoicesPage />} />
+            <Route path="/expenses" element={<ExpensesPage />} />
+          </Routes>
+        </main>
+        <footer className="bg-primary text-white text-center py-4">
+          <p>&copy; ${new Date().getFullYear()} Coffee Export Solutions. All rights reserved.</p>
+          <p className="text-xs text-gray-400 mt-1">Data is stored in-memory and will be lost on page refresh (Demo purposes).</p>
+        </footer>
+      </div>
     </AppContext.Provider>
   );
 };

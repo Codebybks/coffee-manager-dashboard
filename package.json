@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "dotenv": "^16.5.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^6.25.1"
@@ -20,5 +21,18 @@
     "@vitejs/plugin-react": "^4.3.1",
     "typescript": "^5.5.4",
     "vite": "^5.3.5"
-  }
+  },
+  "description": "This contains everything you need to run your app locally.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Codebybks/coffee-manager-dashboard.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Codebybks/coffee-manager-dashboard/issues"
+  },
+  "homepage": "https://github.com/Codebybks/coffee-manager-dashboard#readme"
 }
