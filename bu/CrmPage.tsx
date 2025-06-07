@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { useAppContext } from '../App';
 import { Customer, CoffeeOrigin, CustomerStatus, Certification, Interaction, OptionType } from '../types';
@@ -178,10 +177,7 @@ const InteractionForm: React.FC<{ customerId: string; onClose: () => void }> = (
 
 
 const CrmPage: React.FC = () => {
-import { supabase } from '../supabaseClient'; // Make sure you have this file correctly set up
-const CrmPage: React.FC = () => {
-  const [customers, setCustomers] = useState<Customer[]>([]);
-
+  const { customers, addCustomer, updateCustomer } = useAppContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInteractionModalOpen, setIsInteractionModalOpen] = useState(false);
   const [isDetailViewOpen, setIsDetailViewOpen] = useState(false);

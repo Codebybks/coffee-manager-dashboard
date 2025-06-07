@@ -6,9 +6,9 @@ import SalesPage from './components/SalesPage';
 import InvoicesPage from './components/InvoicesPage';
 import ExpensesPage from './components/ExpensesPage';
 import DashboardPage from './components/DashboardPage';
-import LoginPage from './components/LoginPage'; // Import LoginPage
+import LoginPage from '../components/LoginPage'; // Import LoginPage
 import { HomeIcon, UsersIcon, ShoppingCartIcon, DocumentTextIcon, CreditCardIcon, ChartBarIcon } from './constants';
-import { supabase, Session } from './supabaseClient'; // Import supabase and Session
+import { supabase, Session } from '../supabaseClient'; // Import supabase and Session
 
 const initialCustomers: Customer[] = [
   { id: 'cust_1', companyName: 'Beans & Brews', contactPerson: 'Alice Smith', country: 'USA', email: 'alice@bnb.com', phone: '555-1234', preferredOrigin: CoffeeOrigin.YIRGACHEFFE, certificationsRequired: [Certification.ORGANIC, Certification.FAIR_TRADE], status: CustomerStatus.ACTIVE, assignedSalesRep: 'John Doe', notes: 'Loves bright, acidic coffees.', nextFollowUpDate: '2024-08-15', interactions: [{id: 'int_1', date: '2024-07-10', type: 'Call', notes: 'Discussed new Yirgacheffe crop.'}] },

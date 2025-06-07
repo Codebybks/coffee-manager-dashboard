@@ -141,7 +141,7 @@ const DashboardPage: React.FC = () => {
         </div>
 
         <div>
-            <h3 className="text-lg font-medium text-blue-600 mb-2">High-Value Expenses Awaiting Approval (>{'USD 500'})</h3>
+            <h3 className="text-lg font-medium text-blue-600 mb-2">High-Value Expenses Awaiting Approval (&gt;{'USD 500'})</h3>
             {highValueExpensesToApprove.length > 0 ? (
                 <ul className="space-y-2 text-sm">
                 {highValueExpensesToApprove.map(exp => (
