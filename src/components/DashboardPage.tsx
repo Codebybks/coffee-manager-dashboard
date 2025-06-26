@@ -76,7 +76,7 @@ const DashboardPage: React.FC = () => {
   const handleToggleExpenseApproval = (expenseId: string) => {
     const expense = expenses.find(e => e.id === expenseId);
     if (expense) {
-      updateExpense({ ...expense, isApproved: !expense.isApproved });
+      updateExpense({ ...expense,    isApproved: !expense.isApproved });
     }
   };
 
@@ -99,7 +99,7 @@ const DashboardPage: React.FC = () => {
             <div className="max-h-96 overflow-y-auto space-y-2">
               {profitPerShipment.map(item => (
                 <div key={item.orderId} className="p-3 bg-gray-50 rounded-md text-sm">
-                  <p className="font-medium">{item.product} (Order: {item.orderId.substring(0,6)}...)</p>
+                  <p className="font-medium">{item.product} (Order: {item.orderId?.substring(0,6) ?? '—'}...)</p>
                   <p>Revenue (Paid): <span className="text-green-600">USD {item.totalRevenue.toFixed(2)}</span></p>
                   <p>Approved Expenses: <span className="text-red-600">USD {item.totalExpenses.toFixed(2)}</span></p>
                   <p>Profit: <span className={`font-bold ${item.profit >= 0 ? 'text-green-700' : 'text-red-700'}`}>USD {item.profit.toFixed(2)}</span></p>

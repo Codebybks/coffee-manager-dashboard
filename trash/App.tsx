@@ -100,12 +100,63 @@ const App: React.FC = () => {
     `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
   // ─── 2) ALL useCallback HOOKS (also always called, never inside a conditional) ───
-  const addCustomer = useCallback((customerData: Omit<Customer, 'id' | 'interactions'>) => {
-    setCustomers((prev) => [
-      ...prev,
-      { ...customerData, id: generateId('cust'), interactions: [] }
-    ]);
-  }, []);
+ // Make sure `supabase` is already imported at the top of this file
+//   import { supabase } from "@/supabaseClient";
+
+const addCustomer = useCallback(
+  async (c: Omit<Customer, "id" | "interactions">) => {
+    /* 1️⃣ map camelCase keys → snake_case DB column names */
+    const dbRow = {
+      company_name:        c.companyName,
+      contact_person:      c.contactPerson,
+      country:             c.country,
+      email:               c.email,
+      phone:               c.phone,
+      preferred_origin:    c.preferredOrigin,
+      status:              c.status,
+      assigned_sales_rep:  c.assignedSalesRep,
+      next_follow_up_date: c.nextFollowUpDate || null,
+      notes:               c.notes,
+      certifications_required: (c.certificationsRequired ?? []).join(", "),
+    };
+
+    /* 2️⃣ insert into Supabase */
+    const { data, error } = await supabase
+      .from("customers")
+      .insert(dbRow)
+      .select()      // ask Supabase to return the full inserted row
+      .single();
+
+    if (error || !data) {
+      console.error("❌ insert error:", error?.message);
+      alert(`Failed to save: ${error?.message}`);
+      return;
+    }
+
+    /* 3️⃣ map the returned snake_case row → camelCase, then update state */
+    const toCustomer = (row: any): Customer => ({
+      id:                    row.id,
+      companyName:           row.company_name,
+      contactPerson:         row.contact_person,
+      country:               row.country,
+      email:                 row.email,
+      phone:                 row.phone,
+      preferredOrigin:       row.preferred_origin,
+      status:                row.status,
+      assignedSalesRep:      row.assigned_sales_rep,
+      nextFollowUpDate:      row.next_follow_up_date,
+      notes:                 row.notes,
+      certificationsRequired: row.certifications_required
+        ? row.certifications_required.split(",").map((s: string) => s.trim())
+        : [],
+      interactions: [],      // will load later
+    });
+
+    setCustomers(prev => [...prev, toCustomer(data)]);
+  },
+  []
+);
+
 
   const updateCustomer = useCallback((updatedCustomer: Customer) => {
     setCustomers((prev) =>
